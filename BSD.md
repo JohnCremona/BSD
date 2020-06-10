@@ -91,7 +91,7 @@ The complete local factor is a product of individual local factors, one for each
 
 ### At finite places
 
-At a finite place $v$ the local factor is $c_v$, the Tamagawa number at $v$.  This is a positive integer, the index $c_v = [E(K_v):E(K_v^0)]$, i.e. the number of connected components of $E(K_v)$.  At a place of good reduction we have $c_v=1$, so this is in effect a finite product.
+At a finite place $v$ the local factor is $c_v$, the Tamagawa number at $v$.  This is a positive integer, the index $c_v = [E(K_v):E(K_v)^0]$, i.e. the number of connected components of $E(K_v)$.  At a place of good reduction we have $c_v=1$, so this is in effect a finite product.
 
 #### Magma
 
@@ -109,17 +109,17 @@ gives the product of all Tamagawa numbers $c_v$ times the correction factor $N(\
 
 ### At infinite places
 
-At each infinite place the local factor is a sutably normalized period $\Omega_v$ and the total contribution from all infinite places is $\prod_{v\mid\infty}\Omega_v$.   Theoretically the $\Omega_v$ are defined in terms of a N&eacute;ron differential.   We first define the periods for a fixed model of $E$ and then explain how to normalize it.  Let $\omega_E = dx/(2y+a_1x+a_3)$ be the usual invariant differential associated to a Weierstrass model for $E$.
+At each infinite place the local factor is a suitably normalized period $\Omega_v$ and the total contribution from all infinite places is $\prod_{v\mid\infty}\Omega_v$.   Theoretically the $\Omega_v$ are defined in terms of a N&eacute;ron differential.   We first define the periods for a fixed model of $E$ and then explain how to normalize it.  Let $\omega_E = dx/(2y+a_1x+a_3)$ be the usual invariant differential associated to a Weierstrass model for $E$.
 
 #### At a real place
 
 If $v$ is a real place define $\Omega_v(E)$ to be the integral of $\omega_E$ over $E(\R)$.   This is equal to the least positive real period multiplied by the number of real components at the place $v$ (which is $1$ when $v(\Delta_E)<0$ and $2$ when $v(\Delta_E)>0$).
 
-  When $\Delta_E>0$ the period lattice of $E$ at $v$ has generating periods $x$, $yi$ with $x,y>0$, and $\Omega_v=2x$. When $\Delta_E<0$ the period lattice of $E$ at $v$ has generating periods $2x$, $x+yi$ with $x,y>0$, and $\Omega_v=2x$.
+  When $v(\Delta_E)>0$ the period lattice of $E$ at $v$ has generating periods $x$, $yi$ with $x,y>0$, and $\Omega_v=2x$. When $v(\Delta_E)<0$ the period lattice of $E$ at $v$ has generating periods $2x$, $x+yi$ with $x,y>0$, and $\Omega_v=2x$.
 
 #### At a complex place
 
-If $v$ is a complex place define $\Omega_v(E)$ to be **twice** the integral of $\omega_E$ over $E(\C)$.  If the period lattice of $E$ at $v$ has generating periods $w_1$, $w_2$ with $\Im(w_2/w_1)>0$, then $\Omega_v=2\Im(\overline{w_1}w_2)$ (which is positive).
+If $v$ is a complex place define $\Omega_v(E)$ to be **twice** the integral of $\omega_E\wedge\overline{\omega_E}$ over $E(\C)$.  If the period lattice of $E$ at $v$ has generating periods $w_1$, $w_2$ with $\Im(w_2/w_1)>0$, then $\Omega_v=2\Im(\overline{w_1}w_2)$ (which is positive).
 
 If we were to define $\Omega_v$ for complex $v$ to be simply the integral of $\omega_E$ over $E(\C)$, then the BSD formula would need an additional factor of $2^{r_2}$.
 
@@ -176,7 +176,7 @@ He combines all the local factors together into a quantity called $C_{E/K}$: Wri
     \>\cdot\>\prod_{{v|\infty},{\text{real}}} \int\limits_{E(K_v)}\!\! |\omega|
     \>\cdot\>\prod_{{v|\infty},{\text{cplx}}} 2\!\!\!\int\limits_{E(K_v)}\!\! \omega\wedge \bar\omega,
 $$
-with $c_v$ the local Tamagawa number at $v$ and  $|\cdot|_v$ the nomalised absolute value on $K_v$.  If $\omega$ is the differential associated to a global minimal model then $\left|\frac{\omega}{\neron{v}}\right|_{_v}=1$ for all finite $v$ and this reduces to our unadjusted local factor.  In general the factor $N(\mathfrak{u})$ in our formula accounts for the difference in scaling between the differential $\omega_E$ and the local N&eacute;ron differential $\neron{v}$ at every place.
+with $c_v$ the local Tamagawa number at $v$ and  $|\cdot|_v$ the normalised absolute value on $K_v$.  If $\omega$ is the differential associated to a global minimal model then $\left|\frac{\omega}{\neron{v}}\right|_{_v}=1$ for all finite $v$ and this reduces to our unadjusted local factor.  In general the factor $N(\mathfrak{u})$ in our formula accounts for the difference in scaling between the differential $\omega_E$ and the local N&eacute;ron differential $\neron{v}$ at every place.
 
 Note that $C_{E/K}$ as defined here is independent of the model of $E$.
 
