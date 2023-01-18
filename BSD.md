@@ -66,7 +66,7 @@ Otherwise on a system with Magma installed one can resort to
 ## Mordell-Weil factor
 
 This is $$\frac{R(P_1,\dots,P_r)}{|T|^2},$$ where $R()$ is the regulator, i.e. the determinant of the height pairing matrix.  This needs to be normalised correctly!
-1.  The $(i,j)$-entry of the height pairing matrix is $$\left<P_i,P_j\right> = \frac{1}{2}(\hh(P_i+P_j) - \hh(P_i) - \hh(P_j)),$$ so in particular the diagonal entries are the canonical heights of the $P_i$;
+1.  The $(i,j)$-entry of the height pairing matrix is $$\left\langle P_i,P_j\right\rangle = \frac{1}{2}(\hh(P_i+P_j) - \hh(P_i) - \hh(P_j)),$$ so in particular the diagonal entries are the canonical heights of the $P_i$;
 2.  The canonical height should be defined with respect to the $x$-coordinate (so that $x(P)-\hh(P)$ is bounded independently of $P$).  There is another convention (used in some of Silverman's papers) which is half of this, as it is defined with respect to the divisor $(O)$ instead of $2(O)$.  In the MathOverflow post, Silverman explains why it makes sense to use $2(O)$ in the context of BSD.
 3.  The canonical height should **not** be normalized (by dividing by the degree $d$) to be invariant under base-change.  Note that both Magma and Sage by default normalize the height.  Sage has an option to not normalize for heights, but not (as of version 9.1) for the regulator.  Hence in both cases the regulator needs to be adjusted by multiplying by $d^r$.
      
@@ -76,12 +76,14 @@ This is $$\frac{R(P_1,\dots,P_r)}{|T|^2},$$ where $R()$ is the regulator, i.e. t
 #### Sage:
 `E.regulator_of_points([P1,...,Pr]) * d^r / E.torsion_order()^2`
 
-The expression given here will only be correct if the points $P_1,\dots,P_r$ are *saturated*, i.e. generate all of $E(K)$ modulo torsion, so that $[E(K):\left<P_1,\dots,P_r\right>] = |T|$. An alternative expression is sometimes seen which avoids this condition:  $$\frac{R(P_1,\dots,P_r)}{[E(K):\left<P_1,\dots,P_r\right>]^2};$$  this is a neat trick, but not very useful in practice for computations.
+The expression given here will only be correct if the points $P_1,\dots,P_r$ are *saturated*, i.e. generate all of $E(K)$ modulo torsion, so that $[E(K):\left\langle P_1,\dots,P_r\right\rangle] = |T|$. An alternative expression is sometimes seen which avoids this condition:  $$\frac{R(P_1,\dots,P_r)}{[E(K):\left\langle P_1,\dots,P_r\right\rangle]^2};$$  this is a neat trick, but not very useful in practice for computations.
 
 **NB** If the points are not saturated but only generate a subgroup (modulo torsion) of index $n$ then this factor, end hence the overall expression for $S$, will be $1/n^2$ times the correct value.   This will (usually) lead to a non-integral value of $S$, which can be detected.
 
 ### Higher genus
-For Abelian varieties $A$ of general dimension $g$ the formula involves both $A$ and its dual $A'$, and points $P_1',\dots,P_r'$ generating $A'(K)$ modulo torsion.  (Recall that $A$ and $A'$ are isogenous so have the same rank $r$.)  The factor is then $$\frac{\det(<P_i,P'_j>)}{\#A(K)_{tors}\cdot \#A'(K)_{tors}}$$ where now $\left<\cdot,\cdot\right>$ is the height pairing between $A$ and $A'$.
+For Abelian varieties $A$ of general dimension $g$ the formula involves both $A$ and its dual $A'$, and points $P_1',\dots,P_r'$ generating $A'(K)$ modulo torsion.  (Recall that $A$ and $A'$ are isogenous so have the same rank $r$.)  The factor is then 
+$$\frac{\det(\left\langle P_i,P'_j\right\rangle )}{\#A(K)_{tors}\cdot \#A'(K)_{tors}}$$
+where now $\left<\cdot,\cdot\right>$ is the height pairing between $A$ and $A'$.
  
 
 
@@ -148,8 +150,7 @@ gives a list of the $\Omega_v$ for all infinite places, real and complex, includ
 
 ## The full formula
 
-|&#1064;| $=$
-$$ |d_K|^{1/2} \cdot \frac{L^{(r)}(E,1)}{r!} \cdot \frac{|T|^2}{R(P_1,\dots,P_r)} \cdot \frac{1}{N(\mathfrak{u}) \prod_{v\nmid\infty}c_v\prod_{v\mid\infty}\Omega_v}.$$
+|&#1064;| is equal to $$|d_K|^{1/2} \cdot \frac{L^{(r)}(E,1)}{r!} \cdot \frac{|T|^2}{R(P_1,\dots,P_r)} \cdot \frac{1}{N(\mathfrak{u}) \prod_{v\nmid\infty}c_v\prod_{v\mid\infty}\Omega_v}.$$
 
 
 ## Comparisons
@@ -158,7 +159,7 @@ $$ |d_K|^{1/2} \cdot \frac{L^{(r)}(E,1)}{r!} \cdot \frac{|T|^2}{R(P_1,\dots,P_r)
 Tate has a factor $|\mu|^g$ where $g$ (which is $d$ in Tate's notation) is the dimension of the variety and he states that $|\mu|=|d_K|^{1/2}/2^{r_2}$.   So this accounts for both  our "field factor" $|d_K|^{1/2}$ and also the doubling of the complex periods.
 
 ### Gross
-Gross states the formula in the form L-value$=M(A)R(A)h(A)$ where $h(A)=\#$&#1064;.  In the analogy with the analytic class number formula &#1064; plays the role of the class group whose order is usually denoted $h$.  The other factors match our Mordell-Weil factor and Local Factors respectively:
+Gross states the formula in the form L-value$=M(A)R(A)h(A)$ where $h(A)=$|&#1064;|.  In the analogy with the analytic class number formula &#1064; plays the role of the class group whose order is usually denoted $h$.  The other factors match our Mordell-Weil factor and Local Factors respectively:
 
 $R(E)=R(P_1,\dots,R_r)/|T|^2$ for elliptic curves $E$, adjusted as before for general dimension.
 
@@ -167,16 +168,15 @@ $M(A) = M_{\infty}(A)M_f(A)$, where (in our notation) $$M_{\infty}(A) = \prod_{v
 
  
 ### Dokchitser
-$\def\neron#1{\omega_{#1}^o}$
 
 On pages 3-5 he defines the regulator and L-value as we have.  He says that the regulator is the determinant of the **N&eacute;ron-Tate height-pairing** and the prefix "N&eacute;ron-Tate" indicates that the height is relative to $K$ and not the normalized absolute one.
 
-He combines all the local factors together into a quantity called $C_{E/K}$: Writing $\omega$ for any invariant differential on $E$ (with arbitrary scaling), and $\neron{v}$ the local N&eacute;ron differential at a finite place $v$, he defines $$
-  C_{E/K} = \prod_{v\nmid\infty} c_v \left|\frac{\omega}{\neron{v}}\right|_{_v}
+He combines all the local factors together into a quantity called $C_{E/K}$: Writing $\omega$ for any invariant differential on $E$ (with arbitrary scaling), and $\omega_v^o$ the local N&eacute;ron differential at a finite place $v$, he defines $$
+  C_{E/K} = \prod_{v\nmid\infty} c_v \left\vert\frac{\omega}{\omega_v^o}\right\vert_{_v}
     \>\cdot\>\prod_{{v|\infty},{\text{real}}} \int\limits_{E(K_v)}\!\! |\omega|
     \>\cdot\>\prod_{{v|\infty},{\text{cplx}}} 2\!\!\!\int\limits_{E(K_v)}\!\! \omega\wedge \bar\omega,
 $$
-with $c_v$ the local Tamagawa number at $v$ and  $|\cdot|_v$ the normalised absolute value on $K_v$.  If $\omega$ is the differential associated to a global minimal model then $\left|\frac{\omega}{\neron{v}}\right|_{_v}=1$ for all finite $v$ and this reduces to our unadjusted local factor.  In general the factor $N(\mathfrak{u})$ in our formula accounts for the difference in scaling between the differential $\omega_E$ and the local N&eacute;ron differential $\neron{v}$ at every place.
+with $c_v$ the local Tamagawa number at $v$ and  $|\cdot|_v$ the normalised absolute value on $K_v$.  If $\omega$ is the differential associated to a global minimal model then $\left\vert\frac{\omega}{\omega_v^o}\right\vert_{_v}=1$ for all finite $v$ and this reduces to our unadjusted local factor.  In general the factor $N(\mathfrak{u})$ in our formula accounts for the difference in scaling between the differential $\omega_E$ and the local N&eacute;ron differential $\omega_v^o$ at every place.
 
 Note that $C_{E/K}$ as defined here is independent of the model of $E$.
 
