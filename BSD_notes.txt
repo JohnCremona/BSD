@@ -1,0 +1,92 @@
+BSD normalization in code (ecnf-data repository) and LMFDB table (ec_nfcurves)
+
+2 November 2023
+
+======================
+
+ec_nfcurve columns with descriptions:
+
+'Lvalue'           'leading coefficient of L-series'              numeric
+'abs_disc'         'absolute value of discriminant of base field' bigint
+'analytic_rank'    'analytic rank'                                smallint
+'rank'             ' rank'                                        smallint
+'degree'           'Base field degree'                            smallint
+'omega'            'product of local periods'                     numeric
+'reg'              'regulator'                                    numeric
+'sha'              'Analytic order of Sha (rounded)'              integer
+'tamagawa_product' 'Product of Tamagawa numbers'                  integer
+'torsion_order'    'torsion order'                                smallint
+
+Data displayed (from ec struct, sometimes processed by web_latex)):
+
+ar = analytic_rank
+rank
+reg
+omega
+tamagawa_product = recomputed product of stored c_p
+torsion_order (unchanged, but we weblatex it as ntors, only used in Properties)
+Lvalue
+sha = sha (with " (rounded)" appended)
+
+======================
+
+Data as computed (by code in ecnf-data/sage/mwinfo.py) as of 2/11/23):
+
+relevant functions:
+get_field_factor() (cached per field)
+compute_mwdata()
+
+field_factor = sqrt(|D_K|) / 2^r2   (D_K = field disc, r2 = #complex places)
+ar, lval from Magma's AnalyticRank()
+gens = gens as supplied by Magma's MordellWeilShaInformation() + my saturation
+reg = E.regulator_of_points(gens) (where ngens=rank=known)
+NTreg = reg * d^r  where d = [K:Q], r=rank (where known)
+fac = |E.discriminant().norm().abs() / E.minimal_discriminant_ideal().norm()| ^ (1/12)
+omega = global_periodK = fac * product of periods at each arch. place v
+      where the period at v is E.period_lattice(v).omega()
+      v real:  (#components)*(least real period)
+      v complex: complex area = |im(w1*conj(w2))| where w1, w2 is lattice basis
+
+tamagawa_product: computed simply as E.tamagawa_product().  Note that
+Sage now also has E.tamagawa_product_bsd() which includes a correction
+factor at places where the model for E is non-minimal (so they are the
+same if E is a global minimal model).  This quantity C(E/K) is such
+that when multiplied by the periods at infinite places the result is
+independent of the model.
+
+sha = field_factor * lval * nt**2  / (NTreg * tamagawa_product * omega)
+
+data['analytic_rank'] = ar
+data['Lvalue'] = lval
+data['reg'] = reg
+data['torsion_order'] = E.torsion_subgroup().order()
+data['omega'] = omega
+data['tamagawa_product'] = E.tamagawa_product()
+
+======================
+
+Formula in tex notes:
+
+S = ((field_factor)*(L-value)) / ((MW-factor)*(local-factor))
+
+field_factor = sqrt(|D_K|)
+L-value      = L^{(r)}(E,1) / r! = leading coefficient of L-series around s=1
+MW-factor    = NTreg/torsion_order^2  *** using non-normalised canonical heights, i.e. NTreg not reg
+local-factor = product of local factors local_factor(v), one for each place v,  times a correction factor
+
+where local_factor(v) is:
+
+v finite:  the Tamagawa number at v (=1 except possibly at primes of bad reduction)
+v real:    (# real components) * (least positive real period)
+v complex: 2 * im(conj(w1)*w2) assuming im(w2/w1)>0
+
+and the correction factor is the quantity fac defined above.
+
+Comparison:  S compared with sha is
+
+  *2^r2 (from field_factor)
+  /2^r2 (from complex periods not being computed with the factor of 2)
+
+so they agree but not factor-by-factor.  For agreement we should
+multiply the field factor by 2^r2 and divide omega by the same.
+

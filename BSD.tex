@@ -1,6 +1,8 @@
 \documentclass{amsart}
 \usepackage{amssymb}
 \usepackage{amsmath}
+%\usepackage{url}
+\usepackage{hyperref}
 
 \newcommand{\software}[1]{\textsf{#1}} % same as defi currently
 \newcommand{\Sage}{\software{SageMath}{}\ }
@@ -13,20 +15,34 @@
 \newcommand\R{\mathbb{R}}
 \newcommand\C{\mathbb{C}}
 \newcommand\hh{\hat{h}}
+\DeclareMathOperator{\tors}{tors}
+\DeclareMathOperator{\real}{real}
+\DeclareMathOperator{\complex}{complex}
 
 \begin{document}
 
 \title{The BSD formula over number fields}
 \author{John E. Cremona}
+
+\begin{abstract}
+  We give an explicit statement of the Birch--Swinnerton-Dyer (BSD)
+  formula for elliptic curves over general number fields, carefully
+  defining all the terms and showing how they may be be computed using
+  the software packages \Sage and \Magma.  In particular, we highlight
+  certain differences in the way the formula has been stated in the
+  literature.
+\end{abstract}
+
 \maketitle
 
-The Birch--Swinnerton-Dyer (BSD) formula for elliptic curves over \(\Q\)
-is clearly stated and explained in many texts, but for elliptic curves
-over general number fields there are a number of subtleties leading to
-the appearance of factors which are equal to \(1\) in the rational case,
-and clear and explicit statements are harder to find. We cite three (by
-Tate, Gross, and T. Dokchitser) below, as well as a discussion on
-MathOverflow highlighting the common confusions which people have. The
+The Birch--Swinnerton-Dyer (BSD) formula for elliptic curves over
+\(\Q\) is clearly stated and explained in many texts, but for elliptic
+curves over general number fields there are a number of subtleties
+leading to the appearance of factors which are equal to \(1\) in the
+rational case, and clear and explicit statements are harder to
+find. We cite three, by Tate \cite{Tate}, Gross \cite{Gross}, and
+T. Dokchitser \cite{Dok}, as well as a discussion on MathOverflow
+\cite{MO} highlighting the common confusions which people have. The
 point of this text is to clear up the potentially confusing issues.
 
 For simplicity we concentrate on the case of elliptic curves, only
@@ -36,7 +52,7 @@ higher dimension \(g\).
 Traditionally, the BSD formula is written as a formula for the leading
 coefficient of the L-series \(L(E,s)\) at \(s=1\), which we call the
 \emph{L-value}, in terms of other quantities, including the order of
-the \emph{Tate-Shafarevich group}~$\Sha$. We always assume the standard
+the \emph{Tate-Shafarevich group}~$\Sha$. We will assume the standard
 conjectures, first that \(L(E,s)\) has analytic continuation so that
 its behaviour at \(s=1\) is defined, and also that $\Sha$ is finite. Then
 we rearrange the formula so that it expresses \(S=|\Sha|\) in terms of
@@ -44,13 +60,15 @@ quantities which may be computed.
 
 \section{Code}\label{code}
 
-Where possible, we give the appropriate commands in \Sage and \Magma to
-compute these quantities. Many of these functions have a precision
-parameter to control the precision of the output: the input is always
-exact, but the output may in principle be computed to arbitrary
-precision. \Magma can compute all the quantities separately (with a
-little work) and can also evaluate the entire formula. \Sage can compute
-all the quantities except for the L-value itself (unless \(K=\Q\)).
+Where possible, we give the appropriate commands in \Sage (version
+10.1) and \Magma (version V2.28-3) to compute these quantities. Many
+of these functions have a precision parameter to control the precision
+of the output: the input is always exact, but the output may in
+principle be computed to arbitrary precision. \Magma can compute all
+the quantities separately (with a little work) and can also evaluate
+the entire formula. \Sage can compute all the quantities; unless
+\(K=\Q\), computing the analytic rank and L-value itself currently
+requires calling \Magma from \Sage, or using \GP library functions.
 
 \subsection{\Magma}\label{magma}
 
@@ -72,7 +90,7 @@ For elliptic curves over \(\Q\) only, we have:
 \section{Notation}\label{notation}
 
 \(K\) is a number field of degree \(d=r_1+2r_2\), where \(r_1\) and
-\(r_2\) are the number of real and complex places, and discrimninant
+\(r_2\) are the number of real and complex places, and discriminant
 \(d_K\).
 
 \(E\) is an elliptic curve defined over \(K\), given by an integral
@@ -82,26 +100,39 @@ models do not always exist anyway. We denote by \(\Delta(E)\) the
 discriminant of the model, which is an integral element of \(K\), and by
 \(\mathfrak{d}(E)\) the minimal discriminant ideal of \(E\), an integral
 ideal which is independent of the model. Then
-\((\Delta(E))/\mathfrak{d}(E) = \mathfrak{u}^{12}\) for some fractional
-ideal \(\mathfrak{u}\). (A global minimal model exists if and only if
-\(\mathfrak{u}\) is principal; in general the class of \(\mathfrak{u}\)
+\((\Delta(E))/\mathfrak{d}(E) = \mathfrak{u}_E^{12}\) for some fractional
+ideal \(\mathfrak{u}_E\). (A global minimal model exists if and only if
+\(\mathfrak{u}\) is principal; in general the class of \(\mathfrak{u}_E\)
 is an invariant of \(E\).)
 
 The Mordell-Weil group \(E(K)\) is a finitely-generated abelian group of
-rank \(r=r(E(K))\), with finite torsion subgroup \(T=E(K)_{tors}\). Let
+rank \(r=r(E(K))\), with finite torsion subgroup \(T=E(K)_{\tors}\). Let
 \(P_1,\dots,P_r\in E(K)\) be points which generate \(E(K)/T\).
 
 \section{Outline formula}\label{outline-formula}
 
-The formula for \(S\) has the form \[
-S = \frac{(\text{Field factor})(\text{$L$-value})}{(\text{Mordell-Weil factor})(\text{Local factor})}
+The formula for \(S\) has the form
+\[
+S = \frac{(\text{field-factor})(\text{$L$-value})}{(\text{Mordell-Weil factor})(\text{local-factor})}.
 \]
+We will define each of these factors in turn.  Note that while
+different sources disagree on the exact definitions of the factors,
+the differences cancel out in the product: in particular there is a
+factor $2^{r_2}$ which is included either by multiplying the
+local-factor (as in \cite{Dok}) and or by dividing the field-factor
+(as in \cite{Tate}).
 
-\section{Field factor}\label{field-factor}
+\section{The field factor}\label{field-factor}
 
-This is simply \[|d_K|^{1/2},\] so is equal to \(1\) for \(K=\Q\)).
-Gross includes this in with the local factors at infinite places. For
-Abelian varieties of dimension \(g\) the factor is \(|d_K|^{g/2}\).
+This is \[|d_K|^{1/2},\] so is equal to \(1\) for \(K=\Q\).
+
+Gross includes this in with the local factors at infinite places.  In
+some expositions, there is an extra factor of $2$ in the contribution
+from each complex place to the local factor, and the field factor is
+set to \(|d_K|^{1/2}/2^{r_2}\) to compensate.
+
+For Abelian varieties of dimension \(g\) the factor is
+\(|d_K|^{g/2}\).
 
 \subsection{\Magma code:}\label{magma-1}
 
@@ -141,11 +172,11 @@ Otherwise on a system with \Magma installed one can resort to
 \texttt{RR(magma(E).LSeries().Evaluate(1,\ Derivative=r))\ /\ factorial(r)}
 \]
 
-\section{Mordell-Weil factor}\label{mordell-weil-factor}
+\section{The Mordell-Weil factor}\label{mordell-weil-factor}
 
 This is \[\frac{R(P_1,\dots,P_r)}{|T|^2},\] where \(R()\) is the
 regulator, i.e.~the determinant of the height pairing matrix. This needs
-to be normalised correctly!
+to be normalised correctly.
 
 \begin{enumerate}
 \item The \((i,j)\)-entry of the height pairing matrix is
@@ -155,10 +186,10 @@ to be normalised correctly!
 \item The canonical height should be defined with respect to the
   \(x\)-coordinate (so that \(x(P)-\hh(P)\) is bounded independently
   of \(P\)). There is another convention (used in some of Silverman's
-  papers) which is half of this, as it is defined with respect to the
-  divisor \((O)\) instead of \(2(O)\). In the MathOverflow post,
-  Silverman explains why it makes sense to use \(2(O)\) in the context
-  of BSD.
+  papers, for example \cite{Silverman}) which is half of this, as it
+  is defined with respect to the divisor \((O)\) instead of
+  \(2(O)\). In the MathOverflow post \cite{MO}, Silverman explains why
+  it makes sense to use \(2(O)\) in the context of BSD.
 \item The canonical height should \textbf{not} be normalized (by
   dividing by the degree \(d\)) to be invariant under
   base-change. Note that both \Magma and \Sage by default normalize
@@ -176,7 +207,7 @@ to be normalised correctly!
 \subsection{\Sage code:}\label{sage-3}
 
 \[
-\texttt{E.regulator\_of\_points({[}P1,...,Pr{]})\ *\ d\^{}r\ /\ E.torsion\_order()\^{}2}
+\texttt{E.regulator\_of\_points({[}P1,...,Pr{]}, normalised=False)\ /\ E.torsion\_order()\^{}2}
 \]
 
 The expression given here will only be correct if the points
@@ -187,11 +218,11 @@ expression is sometimes seen which avoids this condition:
 \[\frac{R(P_1,\dots,P_r)}{[E(K):\left\langle P_1,\dots,P_r\right\rangle]^2};\]
 this is a neat trick, but not very useful in practice for computations.
 
-\textbf{NB} If the points are not saturated but only generate a
-subgroup (modulo torsion) of index \(n\), then this factor, and hence
-the overall expression for \(S\), will be \(1/n^2\) times the correct
-value. This will often lead to a non-integral value of \(S\),
-which can be detected.
+\textbf{NB} If we evaluate the formula with points are not saturated
+but only generate a subgroup (modulo torsion) of index \(n\), then
+this factor, and hence the overall expression for \(S\), will be
+\(1/n^2\) times the correct value. This will often lead to a
+non-integral value of \(S\), which can be detected.
 
 \subsection{Higher genus}\label{higher-genus}
 
@@ -199,17 +230,17 @@ For Abelian varieties \(A\) of general dimension \(g\) the formula
 involves both \(A\) and its dual \(A'\), and points \(P_1',\dots,P_r'\)
 generating \(A'(K)\) modulo torsion. (Recall that \(A\) and \(A'\) are
 isogenous so have the same rank \(r\).) The factor is then
-\[\frac{\det(\left\langle P_i,P'_j\right\rangle )}{\#A(K)_{tors}\cdot \#A'(K)_{tors}}\]
+\[\frac{\det(\left\langle P_i,P'_j\right\rangle )}{\#A(K)_{\tors}\cdot \#A'(K)_{\tors}}\]
 where now \(\left<\cdot,\cdot\right>\) is the height pairing between
 \(A\) and \(A'\).
 
-\section{Local factors}\label{local-factors}
+\section{The local factor}\label{local-factors}
 
-The complete local factor is a product of individual local factors, one
-for each place of \(K\). In our expresson the local factors at infinite
-places will be defined in a way which depends on the model, so the
-complete local factor also includes a correction factor making the
-expression independent of the model.
+The complete local factor is a product of individual local factors,
+one for each place of \(K\). We will define the local factors at
+infinite places will be defined in a way which depends on the model,
+but the complete local factor also includes a correction factor making
+the complete expression independent of the model.
 
 \subsection{At finite places}\label{at-finite-places}
 
@@ -233,7 +264,7 @@ Over all number fields (including \(\Q\))
 \texttt{E.tamagawa\_product\_bsd()}
 \]
 gives the product of all Tamagawa numbers \(c_v\) times the correction
-factor \(N(\mathfrak{u})\) (defined below) to allow for the model not
+factor \(N(\mathfrak{u})_E\) (defined below) to allow for the model not
 being minimal, while \texttt{E.tamagawa\_product()} returns
 just the product of the Tamagawa numbers (over \(\Q\) only).
 
@@ -242,8 +273,8 @@ just the product of the Tamagawa numbers (over \(\Q\) only).
 At each infinite place the local factor is a suitably normalized period
 \(\Omega_v\) and the total contribution from all infinite places is
 \(\prod_{v\mid\infty}\Omega_v\). Theoretically the \(\Omega_v\) are
-defined in terms of a Néron differential. We first define the periods
-for a fixed model of \(E\) and then explain how to normalize it. Let
+defined in terms of a N\'eron differential. We first define the periods
+for a fixed model of \(E\) and then explain how to normalize them. Let
 \(\omega_E = dx/(2y+a_1x+a_3)\) be the usual invariant differential
 associated to a Weierstrass model for \(E\).
 
@@ -262,32 +293,42 @@ generating periods \(2x\), \(x+yi\) with \(x,y>0\), and \(\Omega_v=2x\).
 
 \subsection{At a complex place}\label{at-a-complex-place}
 
-If \(v\) is a complex place define \(\Omega_v(E)\) to be \textbf{twice}
-the integral of \(\omega_E\wedge\overline{\omega_E}\) over \(E(\C)\). If
-the period lattice of \(E\) at \(v\) has generating periods \(w_1\),
-\(w_2\) with \(\Im(w_2/w_1)>0\), then
-\(\Omega_v=2\Im(\overline{w_1}w_2)\) (which is positive).
+If \(v\) is a complex place define \(\Omega_v(E)\) to be the integral
+of \(\omega_E\wedge\overline{\omega_E}\) over \(E(\C)\). If the period
+lattice of \(E\) at \(v\) has generating periods \(w_1\), \(w_2\) with
+\(\Im(w_2/w_1)>0\), then \(\Omega_v=2\Im(\overline{w_1}w_2)\), which
+is positive: it is double the covolume of the period lattice.
 
-If we were to define \(\Omega_v\) for complex \(v\) to be simply the
-integral of \(\omega_E\) over \(E(\C)\), then the BSD formula would need
-an additional factor of \(2^{r_2}\).
-
-\subsection{Complete local factor}\label{complete-local-factor}
-
-\[\frac{1}{\prod_{v\nmid\infty}c_v\prod_{v\mid\infty}\Omega_v N(\mathfrak{u})}.\]
+In \cite{Dok}, \(\Omega_v\) for complex \(v\) is defined to be double
+the definition here, which appears to be an error.  Note that if we
+instead defined $\Omega_v$ to be the lattice covolume, we would need
+to compensate by dividing the field factor by~$2^{r_2}$.
 
 \subsection{Adjustment for non-minimal models}\label{adjustment-for-non-minimal-models}
 
 For a global minimal model, the minimal discriminant ideal is simply the
 principal ideal \(\mathfrak{d}(E)=(\Delta(E))\). In general,
-\((\Delta(E))=\mathfrak{u}^{12}\mathfrak{d}(E)\) for some fractional
-ideal \(\mathfrak{u}\) whose valuation at each prime \(\mathfrak{p}\) is
+\((\Delta(E))=\mathfrak{u}_E^{12}\mathfrak{d}(E)\) for some fractional
+ideal \(\mathfrak{u}_E\) whose valuation at each prime \(\mathfrak{p}\) is
 \(1/12\) of the difference between the valuation at \(\mathfrak{p}\) of
 \(\Delta(E)\) and that of the local minimal model at \(\mathfrak{p}\).
 
-The total contribution from the infinite places is now
-\[N(\mathfrak{u})\prod_{v\mid\infty}\Omega_v = \left|\frac{N(\Delta(E))}{N(\mathfrak{d}(E)}\right|^{1/12}\prod_{v\mid\infty}\Omega_v,\]
-where \(N(\cdot)\) denotes the norm of a fractional ideal.
+The product \(\prod_{v\mid\infty}\Omega_v N(\mathfrak{u}_E)\) is
+independent of the model.  Scaling the model for~$E$ by~$\lambda\in
+K^*$ multiplies~$\mathfrak{u}_E$ by the principal ideal~$(\lambda)$
+and hence multiples~\(N(\mathfrak{u}_E)\) by \(|N(\lambda)|\); in
+compensation, \(\Omega_v\) (for each infinite place~$v$) is
+multiplied by~$|\lambda|_v$, and the product of these is
+again~\(|N(\lambda)|\).
+
+\subsection{Complete local factor}\label{complete-local-factor}
+The complete local factor, including a contribution from all finite
+and infinite places and independent of the model,  is
+\[
+\prod_{v\nmid\infty}c_v\prod_{v\mid\infty}\Omega_v N(\mathfrak{u}_E)
+=
+\prod_{v\nmid\infty}c_v\prod_{v\mid\infty}\Omega_v \left|\frac{N(\Delta(E))}{N(\mathfrak{d}(E)}\right|^{1/12}.
+\]
 
 \subsection{\Magma code:}\label{magma-5}
 \[
@@ -296,96 +337,124 @@ where \(N(\cdot)\) denotes the norm of a fractional ideal.
 gives a basis for the period lattice with respect to each infinite
 place, starting with the real places. In evaluating
 \texttt{ConjecturalSha()} the product of the actual real and complex
-periods \(\Omega_v\) are computed from these, including factors of 2 for
-the real places where the discriminant is positive and a factor
-\(2^{r_2}\), but the individual \(\Omega_v\) values are not accessible
-to the user.
+periods \(\Omega_v\) are computed from these, including factors of 2
+for the real places where the discriminant is positive and a factor
+\(2^{r_2}\) from the Dokchitser normalisation of the complex periods,
+but the individual \(\Omega_v\) values are not easily accessible to
+the user.
 
 \subsection{\Sage code:}\label{sage-5}
-
+For each infinite place,
 \[
-\texttt{{[}EK.period\_lattice(v).omega()\ for\ v\ in\ K.places(){]}}
+\texttt{E.period\_lattice(v).omega()}
 \]
-gives a list of the \(\Omega_v\) for all infinite places, real and
-complex, including the factor of 2 for real places where the
-discriminant is positive, but \textbf{not} the factor of 2 at complex
-places. So to obtain \(\prod_{v\mid\infty}\Omega_v\) one needs the
-following:
+gives the value of \(\Omega_v\), including the factor of 2 for real
+places where the discriminant is positive.  Hence the complete local
+factor is given by
 \[
-\texttt{prod({[}EK.period\_lattice(v).omega()\ for\ v\ in\ K.places(){]})\ *\ 2**(K.signature(){[}1{]})}
+\texttt{prod({[}EK.period\_lattice(v).omega()\ for\ v\ in\ K.places(){]})\ *\ E.tamagawa\_product\_bsd()}
 \]
 
 \section{The full formula}\label{the-full-formula}
-
+The analytic order of $\Sha$ is given by the formula
 \[
-\Sha =
-|d_K|^{1/2} \cdot \frac{L^{(r)}(E,1)}{r!} \cdot \frac{|T|^2}{R(P_1,\dots,P_r)} \cdot \frac{1}{N(\mathfrak{u}) \prod_{v\nmid\infty}c_v\prod_{v\mid\infty}\Omega_v}.\]
+S =
+|d_K|^{1/2}
+\cdot
+\frac{L^{(r)}(E,1)}{r!}
+\cdot
+\frac{|T|^2}{R(P_1,\dots,P_r)}
+\cdot
+\frac{1}{N(\mathfrak{u}_E)\prod_{v\nmid\infty}c_v\prod_{v\mid\infty}\Omega_v}.
+\]
 
 \section{Comparisons}\label{comparisons}
 
 \subsection{Tate}\label{tate}
 
-Tate has a factor \(|\mu|^g\) where \(g\) (which is \(d\) in Tate's
-notation) is the dimension of the variety and he states that
-\(|\mu|=|d_K|^{1/2}/2^{r_2}\). So this accounts for both our ``field
-factor'' \(|d_K|^{1/2}\) and also the doubling of the complex periods.
+In \cite{Tate}, Tate has a factor \(|\mu|^g\) where \(g\) (which is
+\(d\) in Tate's notation) is the dimension of the variety and he
+states that \(|\mu|=|d_K|^{1/2}/2^{r_2}\).
+
+While this differs from our field factor, the difference can be
+accounted for by doubling the contribution at the complex places, the
+normalization for which Tate does not make explicit.
 
 \subsection{Gross}\label{gross}
 
-Gross states the formula in the form L-value\(=M(A)R(A)h(A)\) where
-\(h(A)=|\Sha|\). In the analogy with the analytic class
-number formula, $\Sha$ plays the role of the class group whose order is
-usually denoted \(h\). The other factors match our Mordell-Weil factor
-and Local Factors respectively:
-
+In \cite{Gross}, Gross states the formula for an abelian variety $A$
+in the form L-value\(=M(A)R(A)h(A)\) where \(h(A)=|\Sha|\). In the
+analogy with the analytic class number formula, $\Sha$ plays the role
+of the class group whose order is usually denoted \(h\). The other two
+factors match our Mordell-Weil factor, and the product of the field
+and local factors respectively: for $A=E$ an elliptic curve,
+\begin{itemize}
+  \item
 \(R(E)=R(P_1,\dots,R_r)/|T|^2\) for elliptic curves \(E\), adjusted as
 before for general dimension.
-
-\(M(A) = M_{\infty}(A)M_f(A)\), where (in our notation)
-\[M_{\infty}(A) = \prod_{v\mid\infty}\Omega_v \cdot N(\mathfrak{u}) \cdot |d_K|^{-1/2},\]
-and \(M_f(A)\) is the Tamagawa product \(\prod_{v\nmid\infty}c_v\).
+\item
+\(M(E) = M_{\infty}(E)M_f(E)\), where (in our notation)
+\[M_{\infty}(E) = \prod_{v\mid\infty}\Omega_v \cdot N(\mathfrak{u}_E) \cdot |d_K|^{-1/2},\]
+and \(M_f(E)\) is the Tamagawa product \(\prod_{v\nmid\infty}c_v\).
+\end{itemize}
 
 \subsection{Dokchitser}\label{dokchitser}
 
-On pages 3-5 he defines the regulator and L-value as we have. He says
-that the regulator is the determinant of the \textbf{Néron-Tate
-height-pairing} and the prefix ``Néron-Tate'' indicates that the height
-is relative to \(K\) and not the normalized absolute one.
+In \cite[pp.~3--5]{Dok}, Dokchitser defines the regulator and L-value
+as we have. He states that the regulator is the determinant of the
+\textbf{N\'eron-Tate height-pairing}, where the prefix
+``N\'eron-Tate'' indicates that the height is relative to \(K\) and
+not the normalized absolute one.
 
 He combines all the local factors together into a quantity called
 \(C_{E/K}\): Writing \(\omega\) for any invariant differential on \(E\)
-(with arbitrary scaling), and \(\omega_v^o\) the local Néron
+(with arbitrary scaling), and \(\omega_v^o\) the local N\'eron
 differential at a finite place \(v\), he defines \[
   C_{E/K} = \prod_{v\nmid\infty} c_v \left\vert\frac{\omega}{\omega_v^o}\right\vert_{_v}
-    \>\cdot\>\prod_{{v|\infty},{\text{real}}} \int\limits_{E(K_v)}\!\! |\omega|
-    \>\cdot\>\prod_{{v|\infty},{\text{cplx}}} 2\!\!\!\int\limits_{E(K_v)}\!\! \omega\wedge \bar\omega,
+    \>\cdot\>\prod_{{v|\infty},{\real}} \int\limits_{E(K_v)}\!\! |\omega|
+    \>\cdot\>\prod_{{v|\infty},{\complex}} 2\!\!\!\int\limits_{E(K_v)}\!\! \omega_E\wedge \bar\omega_E,
 \] with \(c_v\) the local Tamagawa number at \(v\) and \(|\cdot|_v\) the
 normalised absolute value on \(K_v\). If \(\omega\) is the differential
 associated to a global minimal model then
 \(\left\vert\frac{\omega}{\omega_v^o}\right\vert_{_v}=1\) for all finite
 \(v\) and this reduces to our unadjusted local factor. In general the
-factor \(N(\mathfrak{u})\) in our formula accounts for the difference in
-scaling between the differential \(\omega_E\) and the local Néron
+factor \(N(\mathfrak{u}_E)\) in our formula accounts for the difference in
+scaling between the differential \(\omega_E\) and the local N\'eron
 differential \(\omega_v^o\) at every place.
 
-Note that \(C_{E/K}\) as defined here is independent of the model of
-\(E\).
+We see that \(C_{E/K}\) is independent of the model of \(E\), and is
+$2^{r_2}$ times our local factor.  Otherwise, his formula is identical
+to ours.
 
-\section{References}\label{references}
+\section{Origin of this document and acknowledgements}
+This document started life as a collaborative Markdown document on
+{\tt hackmd.io}, where contributions were also made by Raymond von
+Bommel.  From there it migrated to a \Sage Jupyter notebook, which
+included worked examples in both \Sage and~\Magma, before this
+version.  The source for this document, as well as the \Sage Jupyter
+notebook, are available at the public {\tt github} repository
+\url{https://github.com/JohnCremona/BSD}.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item
-  J. Tate: On the conjectures of Birch and Swinnerton-Dyer and a
-  geometric Analog. Séminaire N. Bourbaki, 1966, exp. no 306,
+Helpful contributions have been gratefully received from Tim
+Dokchitser and Michael Stoll.
+
+\begin{thebibliography}{99}
+\bibitem{Dok}
+  T. Dokchitser: \textit{Notes on the parity conjecture}
+  \url{https://arxiv.org/abs/1009.5389}.
+\bibitem{Gross} B. H. Gross, \textit{On the conjecture of Birch and
+  Swinnerton-Dyer for elliptic curves with complex multiplication}. In
+  Number theory related to Fermat’s last theorem (Cambridge, Mass.,
+  1981), 219–236, Progr. Math., 26, Birkh¨auser. Boston, Mass., 1982.
+\bibitem{MO}
+  MathOverFlow\break
+  \url{https://mathoverflow.net/questions/139575/bsd-conjecture-for-x-017}.
+\bibitem{Silverman} J.H. Silverman, \textit{Computing heights on
+  elliptic curves}, Math. Comp. {\bf 51} (1988), 339-358.
+\bibitem{Tate}
+  J. Tate: \textit{On the conjectures of Birch and Swinnerton-Dyer and a
+  geometric Analog}. S\'eminaire N. Bourbaki, 1966, exp. no 306,
   p.~415-440.
-\item
-  B. Gross
-\item
-  T. Dokchitser: Notes on the parity conjecture
-  {[}https://arxiv.org/abs/1009.5389{]}
-\item
-  MathOverFlow
-  {[}https://mathoverflow.net/questions/139575/bsd-conjecture-for-x-017{]}
-\end{enumerate}
+\end{thebibliography}
+
 \end{document}
